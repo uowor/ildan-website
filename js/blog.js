@@ -118,54 +118,87 @@ async function uploadImage() {
     };
 }
 
+/* js/blog.js - Vercel API용 완전한 저장 로직 */
+
 async function savePost() {
-    const token = document.getElementById('gh-token').value;
+    const password = document.getElementById('admin-pw').value;
     const title = document.getElementById('post-title').value;
     const content = document.getElementById('post-content').value;
 
-    if (!token || !title || !content) return alert("모든 항목을 입력해주세요.");
+    if (!password || !title || !content) {
+        return alert("모든 항목을 입력해주세요.");
+    }
 
-    const apiUrl = `https://api.github.com/repos/${CONFIG.USER}/${CONFIG.REPO}/contents/${CONFIG.PATH}`;
+    // 로딩 표시 (선택 사항)
+    const saveBtn = document.querySelector('.btn-save');
+    saveBtn.innerText = "전송 중...";
+    saveBtn.disabled = true;
 
     try {
-        // 기존 파일 SHA 정보 가져오기
-        const fileRes = await fetch(apiUrl, { headers: { 'Authorization': `token ${token}` } });
-        const fileData = await fileRes.json();
-        const posts = JSON.parse(decodeURIComponent(escape(atob(fileData.content))));
-
-        // 새 데이터 추가
-        const newPost = {
-            id: Date.now(),
-            title,
-            date: new Date().toISOString().split('T')[0],
-            content
-        };
-        posts.push(newPost);
-
-        // 업데이트 요청
-        const updateRes = await fetch(apiUrl, {
-            method: 'PUT',
-            headers: {
-                'Authorization': `token ${token}`,
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                message: `Add post: ${title}`,
-                content: btoa(unescape(encodeURIComponent(JSON.stringify(posts, null, 2)))),
-                sha: fileData.sha
-            })
+        // GitHub API가 아닌, 내 사이트의 Vercel 서버리스 함수로 요청
+        const response = await fetch('/api/save-post', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ title, content, password })
         });
 
-        if (updateRes.ok) {
-            alert("게시 성공! 잠시 후 데이터가 동기화됩니다.");
+        const result = await response.json();
+
+        if (response.ok && result.success) {
+            alert("🎉 블로그 게시 성공! (GitHub 저장소에 반영 중)");
             location.reload();
         } else {
-            throw new Error("업데이트 실패");
+            throw new Error(result.error || "비밀번호가 틀렸거나 서버 오류가 발생했습니다.");
         }
     } catch (err) {
-        alert("에러 발생: 토큰 권한이나 경로를 확인하세요.");
-        console.error(err);
+        alert("에리 발생: " + err.message);
+    } finally {
+        saveBtn.innerText = "서버로 전송";
+        saveBtn.disabled = false;
     }
+}
+
+async function uploadImage() {
+    const fileInput = document.getElementById('image-input');
+    const password = document.getElementById('admin-pw').value;
+    const status = document.getElementById('upload-status');
+    const textarea = document.getElementById('post-content');
+
+    if (!password) return alert("이미지를 업로드하려면 관리자 비밀번호가 필요합니다.");
+    if (!fileInput.files[0]) return;
+
+    const file = fileInput.files[0];
+    const fileName = `img_${Date.now()}_${file.name.replace(/\s/g, '_')}`;
+
+    status.innerText = "이미지 업로드 중...";
+
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+    reader.onload = async () => {
+        const base64Content = reader.result.split(',')[1];
+
+        try {
+            const res = await fetch('/api/upload-image', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ fileName, content: base64Content, password })
+            });
+
+            const data = await res.json();
+            if (res.ok && data.success) {
+                const imgMarkdown = `\n![${file.name}](${data.url})\n`;
+                const start = textarea.selectionStart;
+                const end = textarea.selectionEnd;
+                textarea.value = textarea.value.substring(0, start) + imgMarkdown + textarea.value.substring(end);
+                status.innerText = "✅ 업로드 완료";
+            } else {
+                throw new Error(data.error);
+            }
+        } catch (err) {
+            status.innerText = "❌ 실패";
+            alert("이미지 업로드 에러: " + err.message);
+        }
+    };
 }
 
 window.onload = fetchPosts;

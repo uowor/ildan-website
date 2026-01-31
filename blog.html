@@ -25,10 +25,10 @@
             <button id="admin-btn" class="btn-small" onclick="toggleAdmin()">글쓰기</button>
         </header>
 
-        <div class="admin-panel" id="admin-panel" style="display:none;">
-            <h3>New Post (Markdown & Image Support)</h3>
-            <input type="password" id="gh-token" placeholder="GitHub Personal Access Token">
-            <input type="text" id="post-title" placeholder="제목을 입력하세요">
+        <div id="admin-panel" class="admin-panel" style="display:none;">
+            <h3>New Post (Vercel API Mode)</h3>
+            <input type="password" id="admin-pw" placeholder="관리자 비밀번호를 입력하세요">
+            <input type="text" id="post-title" placeholder="제목">
 
             <div class="image-upload-zone">
                 <input type="file" id="image-input" accept="image/*" style="display:none;" onchange="uploadImage()">
@@ -37,9 +37,9 @@
                 <span id="upload-status"></span>
             </div>
 
-            <textarea id="post-content" placeholder="마크다운 형식으로 내용을 작성하세요..." rows="10"></textarea>
+            <textarea id="post-content" placeholder="마크다운 내용..." rows="10"></textarea>
             <div class="admin-actions">
-                <button class="btn-save" onclick="savePost()">Publish to GitHub</button>
+                <button class="btn-save" onclick="savePost()">서버로 전송</button>
                 <button class="btn-close" onclick="toggleAdmin()">취소</button>
             </div>
         </div>
