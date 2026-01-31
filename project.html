@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Projects | 내 포트폴리오</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+
+<body>
+    <nav>
+        <div class="logo">MyBrand</div>
+        <ul>
+            <li><a href="index.html">Home</a></li>
+            <li><a href="projects.html" class="active">Projects</a></li>
+            <li><a href="blog.html">Blog</a></li>
+        </ul>
+    </nav>
+
+    <section class="container">
+        <h2>My Projects</h2>
+
+        <div class="grid">
+            <section class="container">
+                <div class="header-flex">
+                    <h2>My Projects</h2>
+                    <div class="filter-buttons">
+                        <button onclick="filterProjects('all')">All</button>
+                        <button onclick="filterProjects('Frontend')">Frontend</button>
+                        <button onclick="filterProjects('Backend')">Backend</button>
+                    </div>
+                </div>
+
+                <div id="project-grid" class="grid"></div>
+            </section>
+
+            <script src="js/projects.js"></script>
+        </div>
+    </section>
+</body>
+
+</html>
