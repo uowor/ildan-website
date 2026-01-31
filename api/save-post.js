@@ -9,7 +9,7 @@ export default async function handler(req, res) {
     if (password !== ADMIN_PW) return res.status(401).json({ error: 'Unauthorized' });
 
     const CONFIG = {
-        owner: "uowol",
+        owner: "uowor",
         repo: "ildan-website",
         path: "data/posts.json"
     };
